@@ -1,5 +1,5 @@
-import { turnCube } from './cube.js'
-import { expandCornerTwist } from './corner-twist.js'
+import { cornerOrientation, getCorners, turnCube } from './cube.js'
+import { expandCornerTwist, makeCornerTwist } from './corner-twist.js'
 
 const cornerSlots = ['UFL', 'UFR', 'UBR', 'UBL', 'DBL', 'DBR', 'DFR', 'DFL']
 const edgeSlots = ['UL', 'UF', 'UR', 'UB', 'DL', 'DB', 'DR', 'DF']
@@ -40,4 +40,54 @@ export function findLinkedTurn(from, to) {
 export function applyLinkedTurn(pieces, turn) {
   const moves = LINKED_TURNS[turn]?.moves ?? expandCornerTwist(turn)
   return moves.reduce(turnCube, pieces)
+}
+
+const stickerKey = (stickers) => [...stickers].sort().join('')
+const cornerIds = new Map(cornerSlots.map((name, index) => [stickerKey(name), index]))
+
+export function getLinkedHomeSlot(piece) {
+  return cornerSlots[cornerIds.get(stickerKey(Object.values(piece.stickers)))]
+}
+
+function sortBySwapping(order) {
+  const moves = []
+  for (let target = 0; target < cornerSlots.length; target += 1) {
+    let position = order.indexOf(target)
+    while (position > target) {
+      [order[position - 1], order[position]] = [order[position], order[position - 1]]
+      moves.push(String(position))
+      position -= 1
+    }
+  }
+  return moves
+}
+
+export function solveLinkedCore(pieces) {
+  const corners = getCorners(pieces)
+  const order = []
+  for (const { position, stickers } of corners) {
+    const slot = cornerSlots.indexOf(slotName(position))
+    if (slot >= 0) order[slot] = cornerIds.get(stickerKey(Object.values(stickers)))
+  }
+  const swaps = sortBySwapping(order)
+  const placed = swaps.reduce(applyLinkedTurn, corners)
+  const partner = placed.at(-1).position
+  const twists = placed.slice(0, -1).flatMap((corner) => {
+    const orientation = cornerOrientation(corner)
+    return orientation ? [makeCornerTwist(corner.position, partner, orientation === 1 ? -1 : 1)] : []
+  })
+  return [...swaps, ...twists]
+}
+
+export function scrambleLinkedCore() {
+  const order = cornerSlots.map((_, index) => index)
+  for (let index = order.length - 1; index > 0; index -= 1) {
+    const target = Math.floor(Math.random() * (index + 1))
+    const corner = order[index]
+    order[index] = order[target]
+    order[target] = corner
+  }
+
+  const moves = sortBySwapping([...order])
+  return (moves.length >= 8 ? moves : sortBySwapping(order.reverse())).reverse()
 }

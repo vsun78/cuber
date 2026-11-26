@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { FACES, findPieceRoute, getCorners, inverseMove, isSolved, makeCube, pieceKind, turnCube } from '../src/cube.js'
+import { cornerOrientation, FACES, findPieceRoute, getCorners, inverseMove, isSolved, makeCube, pieceKind, turnCube } from '../src/cube.js'
+import { makeCornerTwist } from '../src/corner-twist.js'
 import { solveCore } from '../src/core-solver.js'
-import { applyLinkedTurn, findLinkedTurn, getLinkedPartner, LINKED_TURNS, slotName } from '../src/linked-core.js'
+import { applyLinkedTurn, findLinkedTurn, getLinkedPartner, LINKED_TURNS, scrambleLinkedCore, slotName, solveLinkedCore } from '../src/linked-core.js'
 
 test('a solved cube has 26 visible pieces and nine stickers of every color', () => {
   const cube = makeCube()
@@ -110,5 +111,44 @@ test('every linked swap exchanges exactly the advertised corners and edges', () 
     }
 
     assert.deepEqual(applyLinkedTurn(next, move), cube)
+  }
+})
+
+test('linked corner solutions also restore the 3×3, including bottom-to-top swaps', () => {
+  const scrambles = [
+    ['7', '6', '5', '4', '3', '2', '1', '5', '4', '3', '2'],
+    ['4', '3', '2', '5', '7', '1', '3', '2', '6'],
+    ...Array.from({ length: 4 }, () => scrambleLinkedCore()),
+  ]
+
+  for (const moves of scrambles) {
+    const cube = moves.reduce(applyLinkedTurn, makeCube())
+    assert.equal(isSolved(getCorners(cube)), false)
+    assert.equal(isSolved(cube), false)
+    const solution = solveLinkedCore(getCorners(cube))
+    assert.equal(isSolved(solution.reduce(applyLinkedTurn, cube)), true)
+  }
+  assert.equal(solveLinkedCore(scrambles[2].reduce(applyLinkedTurn, makeCube())).length >= 8, true)
+})
+
+test('a linked corner solve also restores the 3×3 after swaps and twists', () => {
+  const twist = makeCornerTwist([1, 1, 1], [-1, -1, -1], 1)
+  const moves = ['4', '3', '7', twist, '1', '6', '2', '5', '4']
+  const cube = moves.reduce(applyLinkedTurn, makeCube())
+  const corners = getCorners(cube)
+  assert.deepEqual(corners, moves.reduce(applyLinkedTurn, getCorners(makeCube())))
+  assert.equal(isSolved(solveLinkedCore(corners).reduce(applyLinkedTurn, cube)), true)
+})
+
+test('a clockwise twist and its counterclockwise inverse preserve every other piece', () => {
+  const cube = makeCube()
+  const corners = getCorners(cube)
+  for (const [first, second] of [[corners[0], corners[7]], [corners[1], corners[3]]]) {
+    const twisted = applyLinkedTurn(cube, makeCornerTwist(first.position, second.position, 1))
+    assert.equal(cornerOrientation(twisted[cube.indexOf(first)]), 1)
+    assert.equal(cornerOrientation(twisted[cube.indexOf(second)]), 2)
+    assert.deepEqual(twisted.map(({ position }) => position), cube.map(({ position }) => position))
+    assert.equal(twisted.filter((piece) => !isSolved([piece])).length, 2)
+    assert.deepEqual(applyLinkedTurn(twisted, makeCornerTwist(first.position, second.position, -1)), cube)
   }
 })
