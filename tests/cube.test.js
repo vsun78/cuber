@@ -1,0 +1,36 @@
+import assert from 'node:assert/strict'
+import { test } from 'node:test'
+import { FACES, inverseMove, isSolved, makeCube, turnCube } from '../src/cube.js'
+
+test('a solved cube has 26 visible pieces and nine stickers of every color', () => {
+  const cube = makeCube()
+  assert.equal(cube.length, 26)
+  assert.equal(new Set(cube.map(({ position }) => position.join(','))).size, 26)
+  assert.equal(isSolved(cube), true)
+
+  const colors = cube.flatMap(({ stickers }) => Object.values(stickers))
+  for (const face of Object.keys(FACES)) {
+    assert.equal(colors.filter((color) => color === face).length, 9)
+  }
+})
+
+test('a clockwise front turn sends the top-front-right corner to the bottom-front-right', () => {
+  const cube = turnCube(makeCube(), 'F')
+  const corner = cube.find(({ position }) => position.join(',') === '1,-1,1')
+  assert.deepEqual(corner.stickers, { R: 'U', D: 'R', F: 'F' })
+  assert.equal(isSolved(cube), false)
+})
+
+test('every face supports inverse turns and half turns without moving fixed centers', () => {
+  for (const face of Object.keys(FACES)) {
+    const cube = makeCube()
+    const turned = turnCube(cube, face)
+    assert.equal(isSolved(turned), false)
+    assert.deepEqual(turnCube(turned, inverseMove(face)), cube)
+    assert.deepEqual(turnCube(turned, face), turnCube(cube, `${face}2`))
+    assert.deepEqual(turnCube(turnCube(cube, `${face}2`), `${face}2`), cube)
+    for (const { stickers } of turned.filter(({ position }) => position.filter(Boolean).length === 1)) {
+      assert.equal(Object.keys(stickers)[0], Object.values(stickers)[0])
+    }
+  }
+})
