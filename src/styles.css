@@ -208,3 +208,102 @@ svg { flex: none; }
 .cube-status span { width: 6px; height: 6px; border-radius: 50%; background: #e4ad65; }
 .cube-status:is([data-status='Solved'], [data-status='Core solved'], [data-status='Corners solved'], [data-status='Both solved']) span { background: #8bb58b; }
 .cube-status:is([data-status='Solving'], [data-status='Moving piece']) span { background: #85b0d5; }
+
+.control-rail { min-width: 0; background: var(--panel); }
+.actions { padding: 10px; border-bottom: 1px solid var(--line); }
+.action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.puzzle-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 8px; }
+.puzzle-picker .button { min-height: 28px; background: #38383a; }
+.puzzle-picker .button[aria-pressed='true'] { border-color: #687786; background: #3d4853; }
+.linked-hint { margin-bottom: 8px; color: var(--muted); font-size: 0.8125rem; line-height: 1.35; }
+.linked-heading { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.linked-heading span, .linked-slot { color: var(--muted); font: 0.8125rem/1.25 var(--mono); }
+.linked-slot { margin-top: 4px; }
+.linked-buttons { display: grid; gap: 3px; }
+.link-button { display: grid; grid-template-columns: auto 1fr auto; min-height: 30px; text-align: left; font: 0.8125rem/1.25 var(--mono); }
+.link-button small { color: #ceced0; font: inherit; }
+.sub-actions { display: flex; gap: 3px; margin: 4px -4px -3px; }
+.text-button, .icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 27px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 3px;
+  color: #d6d6d7;
+  background: transparent;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+.icon-button { min-width: 27px; }
+.text-button:hover:not(:disabled), .icon-button:hover:not(:disabled) { background: #49494b; }
+.text-button:disabled { color: #a1a1a4; }
+.step-button { margin-left: auto; color: #bdd6ed; }
+.error { margin-top: 7px; color: #ffaba6; font-size: 0.875rem; line-height: 1.35; }
+
+.turn-panel { padding: 10px; }
+.turn-panel h3 { margin-bottom: 5px; font-size: 0.875rem; font-weight: 620; }
+.turn-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.turn-table tr { border-bottom: 1px solid var(--rule); }
+.turn-table thead th { padding: 4px 0; color: var(--muted); font-size: 0.8125rem; font-weight: 500; }
+.turn-table th:first-child { text-align: left; }
+.turn-table tbody th { width: 38%; font-weight: 510; }
+.turn-table td { width: 31%; padding: 2px 0; text-align: center; }
+.face-label, .selected-colors li { display: inline-flex; align-items: center; gap: 6px; }
+.face-swatch { width: 9px; height: 9px; border: 1px solid #0004; border-radius: 1px; background: var(--face-color); }
+.turn-button { min-width: 43px; min-height: 25px; padding: 0 4px; font: 0.875rem/1 var(--mono); }
+.turn-hint { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; margin-top: 7px; color: var(--muted); font-size: 0.8125rem; line-height: 1.25; }
+kbd { display: inline-block; padding: 2px 4px; border: 1px solid #535356; border-radius: 3px; background: #3a3a3c; color: var(--ink); font: 0.8125rem/1 var(--mono); }
+
+.selection-panel { padding: 8px 10px; border-top: 1px solid var(--line); }
+.selection-panel h3 { margin-bottom: 6px; }
+.selection-empty, .selected-kind { color: var(--muted); font-size: 0.875rem; }
+.selected-kind { text-transform: capitalize; color: #f4bd7b; }
+.selected-colors { display: flex; flex-wrap: wrap; gap: 3px 9px; list-style: none; margin: 5px 0 0; padding: 0; color: #dddddf; font-size: 0.8125rem; }
+
+.history-panel { grid-column: 1 / -1; min-width: 0; border-top: 1px solid #1d1d1f; background: #353537; }
+.history-panel .dock-heading { min-height: 31px; }
+.move-count { color: #c3c3c5; font: 0.8125rem/1.2 var(--mono); font-variant-numeric: tabular-nums; }
+.sequence { min-height: 31px; display: flex; flex-direction: column; justify-content: center; padding: 5px 10px; }
+.history-empty { color: var(--muted); font-size: 0.875rem; }
+.move-list { list-style: none; display: flex; flex-wrap: wrap; gap: 3px; margin: 0; padding: 0; }
+.move-list li { display: grid; place-items: center; min-width: 28px; min-height: 24px; padding-inline: 3px; border: 1px solid #252527; border-radius: 3px; color: var(--ink); background: #464648; font: 0.875rem/1 var(--mono); }
+.move-list li.played { color: #bcbcbf; background: var(--panel); }
+.move-list li[aria-current='step'] { color: #fff; background: var(--active); }
+progress { display: block; width: 100%; height: 3px; appearance: none; border: none; overflow: hidden; margin-bottom: 4px; background: #454547; accent-color: #77a8d8; }
+progress::-webkit-progress-bar { background: #454547; }
+progress::-webkit-progress-value { background: #77a8d8; }
+progress::-moz-progress-bar { background: #77a8d8; }
+
+.shortcuts { width: min(470px, calc(100% - 24px)); padding: 13px; border: 1px solid #555557; border-radius: 4px; color: var(--ink); background: var(--panel); }
+.shortcuts::backdrop { background: #151516b8; }
+.dialog-heading { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.dialog-heading h2 { font-size: 1.05rem; font-weight: 620; }
+.shortcuts dl { margin-top: 8px; }
+.shortcuts dl div { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-block: 7px; border-top: 1px solid var(--rule); font-size: 0.875rem; }
+.shortcuts dd { white-space: nowrap; }
+.shortcuts dd kbd + kbd { margin-left: 3px; }
+
+@media (max-width: 740px) {
+  .simulator { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto; min-height: auto; }
+  .workspace { grid-template-rows: auto clamp(270px, 90vw, 510px) auto auto; border-right: 0; }
+  .control-rail { border-top: 1px solid var(--line); }
+  .turn-button { min-width: 58px; min-height: 34px; }
+  .turn-table td { padding-block: 3px; }
+}
+
+@media (max-width: 420px) {
+  .viewport-heading { flex-wrap: wrap; gap: 4px 10px; }
+  .viewport-controls { margin-left: auto; gap: 7px; }
+  .viewport-bottom { align-items: flex-start; flex-direction: column; gap: 1px; justify-content: center; padding-block: 4px; }
+  .viewport-bottom .text-button { align-self: flex-start; }
+  .view-actions { align-self: flex-end; }
+  .shortcuts dl div { flex-wrap: wrap; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .turn-layer, .piece[data-swapping], .piece[data-swapping] .piece-face, .piece[data-twisting] .piece-body { animation: none; }
+  .cube-stage[data-transitioning] .piece, .cube-camera, .piece[data-parked] { transition: none; }
+}
