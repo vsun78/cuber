@@ -79,3 +79,27 @@ export function inverseMove(move) {
 export function pieceKind(piece) {
   return ['center', 'edge', 'corner'][Object.keys(piece.stickers).length - 1]
 }
+
+const layerTurns = faceEntries.flatMap(([face]) => [face, inverseMove(face), `${face}2`])
+  .map((move) => ({ move, ...describeTurn(move) }))
+
+export function findPieceRoute(from, to) {
+  const destination = to.join(',')
+  const visited = new Set([from.join(',')])
+  const route = [{ position: from, moves: [] }]
+
+  // Search only the selected piece's positions. Each step is a legal turn of the whole cube.
+  for (const { position, moves } of route) {
+    if (position.join(',') === destination) return moves
+    for (const { move, axis, layer, quarters } of layerTurns) {
+      if (position[axis] !== layer) continue
+      const next = rotate(position, axis, quarters)
+      const key = next.join(',')
+      if (visited.has(key)) continue
+      visited.add(key)
+      route.push({ position: next, moves: [...moves, move] })
+    }
+  }
+
+  return null
+}

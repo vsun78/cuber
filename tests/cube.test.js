@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { FACES, inverseMove, isSolved, makeCube, turnCube } from '../src/cube.js'
+import { FACES, findPieceRoute, inverseMove, isSolved, makeCube, pieceKind, turnCube } from '../src/cube.js'
 
 test('a solved cube has 26 visible pieces and nine stickers of every color', () => {
   const cube = makeCube()
@@ -31,6 +31,25 @@ test('every face supports inverse turns and half turns without moving fixed cent
     assert.deepEqual(turnCube(turnCube(cube, `${face}2`), `${face}2`), cube)
     for (const { stickers } of turned.filter(({ position }) => position.filter(Boolean).length === 1)) {
       assert.equal(Object.keys(stickers)[0], Object.values(stickers)[0])
+    }
+  }
+})
+
+test('piece routes reach every position of the same type using legal face turns', () => {
+  const cube = makeCube()
+  for (const [index, source] of cube.entries()) {
+    for (const target of cube) {
+      if (source === target) {
+        assert.deepEqual(findPieceRoute(source.position, target.position), [])
+      } else if (pieceKind(source) === 'center' || pieceKind(source) !== pieceKind(target)) {
+        assert.equal(findPieceRoute(source.position, target.position), null)
+      } else {
+        const moves = findPieceRoute(source.position, target.position)
+        assert.ok(moves?.length)
+        const result = moves.reduce(turnCube, cube)
+        assert.deepEqual(result[index].position, target.position)
+        assert.equal(isSolved([...moves].reverse().map(inverseMove).reduce(turnCube, result)), true)
+      }
     }
   }
 })
