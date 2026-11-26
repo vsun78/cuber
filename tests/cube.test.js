@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { FACES, findPieceRoute, inverseMove, isSolved, makeCube, pieceKind, turnCube } from '../src/cube.js'
+import { FACES, findPieceRoute, getCorners, inverseMove, isSolved, makeCube, pieceKind, turnCube } from '../src/cube.js'
 
 test('a solved cube has 26 visible pieces and nine stickers of every color', () => {
   const cube = makeCube()
@@ -50,6 +50,20 @@ test('piece routes reach every position of the same type using legal face turns'
         assert.deepEqual(result[index].position, target.position)
         assert.equal(isSolved([...moves].reverse().map(inverseMove).reduce(turnCube, result)), true)
       }
+    }
+  }
+})
+
+test('the core inherits the scramble and follows the same turns as the 3×3', () => {
+  const scramble = ['R', 'F2', "U'", 'L2', 'D', 'B']
+  const cube = scramble.reduce(turnCube, makeCube())
+  const core = getCorners(cube)
+  assert.equal(core.length, 8)
+  assert.equal(isSolved(core), false)
+
+  for (const face of Object.keys(FACES)) {
+    for (const move of [face, inverseMove(face), `${face}2`]) {
+      assert.deepEqual(turnCube(core, move), getCorners(turnCube(cube, move)))
     }
   }
 })

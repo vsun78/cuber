@@ -80,6 +80,21 @@ export function pieceKind(piece) {
   return ['center', 'edge', 'corner'][Object.keys(piece.stickers).length - 1]
 }
 
+export function getCorners(pieces) {
+  return pieces.filter((piece) => pieceKind(piece) === 'corner')
+}
+
+export function cornerFaces([x, y, z]) {
+  const vertical = y > 0 ? 'U' : 'D'
+  const lateral = x > 0 ? 'R' : 'L'
+  const depth = z > 0 ? 'F' : 'B'
+  return x * y * z > 0 ? [vertical, lateral, depth] : [vertical, depth, lateral]
+}
+
+export function cornerOrientation({ position, stickers }) {
+  return cornerFaces(position).findIndex((side) => stickers[side] === 'U' || stickers[side] === 'D')
+}
+
 const layerTurns = faceEntries.flatMap(([face]) => [face, inverseMove(face), `${face}2`])
   .map((move) => ({ move, ...describeTurn(move) }))
 
