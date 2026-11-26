@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { FACES, findPieceRoute, getCorners, inverseMove, isSolved, makeCube, pieceKind, turnCube } from '../src/cube.js'
+import { solveCore } from '../src/core-solver.js'
 
 test('a solved cube has 26 visible pieces and nine stickers of every color', () => {
   const cube = makeCube()
@@ -65,5 +66,22 @@ test('the core inherits the scramble and follows the same turns as the 3×3', ()
     for (const move of [face, inverseMove(face), `${face}2`]) {
       assert.deepEqual(turnCube(core, move), getCorners(turnCube(cube, move)))
     }
+  }
+})
+
+test('the core solver resolves both corner orientation and permutation', () => {
+  const commutator = ['R', 'U', "R'", "U'"]
+  const scrambles = [
+    [...commutator, ...commutator, ...commutator],
+    ['R2', 'U2', 'F2', 'L2'],
+    ['D2', "R'", 'B', 'F2', 'L', 'U', 'B2', 'R2', "F'", 'U2', "D'", 'L2'],
+  ]
+
+  assert.deepEqual(solveCore(makeCube()), [])
+  for (const scramble of scrambles) {
+    const cube = scramble.reduce(turnCube, makeCube())
+    const moves = solveCore(getCorners(cube))
+    assert.ok(moves.length > 0)
+    assert.equal(isSolved(getCorners(moves.reduce(turnCube, cube))), true)
   }
 })
