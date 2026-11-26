@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { FACES, findPieceRoute, getCorners, inverseMove, isSolved, makeCube, pieceKind, turnCube } from '../src/cube.js'
 import { solveCore } from '../src/core-solver.js'
+import { applyLinkedTurn, findLinkedTurn, getLinkedPartner, LINKED_TURNS, slotName } from '../src/linked-core.js'
 
 test('a solved cube has 26 visible pieces and nine stickers of every color', () => {
   const cube = makeCube()
@@ -83,5 +84,31 @@ test('the core solver resolves both corner orientation and permutation', () => {
     const moves = solveCore(getCorners(cube))
     assert.ok(moves.length > 0)
     assert.equal(isSolved(getCorners(moves.reduce(turnCube, cube))), true)
+  }
+})
+
+test('every linked swap exchanges exactly the advertised corners and edges', () => {
+  const cube = makeCube()
+  for (const [move, { corners, edges }] of Object.entries(LINKED_TURNS)) {
+    const next = applyLinkedTurn(cube, move)
+    const affected = new Map([[corners[0], corners[1]], [corners[1], corners[0]],
+      [edges[0], edges[1]], [edges[1], edges[0]]])
+    const from = cube.find(({ position }) => slotName(position) === corners[0])
+    const to = cube.find(({ position }) => slotName(position) === corners[1])
+    assert.equal(findLinkedTurn(from.position, to.position), move)
+    assert.equal(findLinkedTurn(to.position, from.position), move)
+    assert.equal(getLinkedPartner(from.position), edges[0])
+    assert.equal(getLinkedPartner(to.position), edges[1])
+
+    for (const [index, original] of cube.entries()) {
+      const home = slotName(original.position)
+      const piece = next[index]
+      const position = slotName(piece.position)
+      assert.equal(position, affected.get(home) ?? home)
+      if (affected.has(home)) assert.equal(piece.stickers[position[0]], home[0])
+      else assert.deepEqual(piece, original)
+    }
+
+    assert.deepEqual(applyLinkedTurn(next, move), cube)
   }
 })
