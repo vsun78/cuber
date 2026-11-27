@@ -42,6 +42,10 @@ npm run dev
 
 Open [the local simulator](http://localhost:5173). Vite forwards `/api` requests to PHP.
 
+## Deploy to Vercel
+
+Import this repository into a Vercel Hobby project and deploy from the repository root. Vercel detects `Dockerfile.vercel` and selects the Container preset. The image builds the React frontend and serves it alongside the PHP API with FrankenPHP, so Classic mode uses the same `/api/cube.php` path in production.
+
 ## How solving works
 
 The JavaScript model tracks each piece’s position and the direction of its stickers. PHP generates a 20-move scramble and solves states created in the simulator by reversing their recorded moves and inverting the turns. It also combines consecutive turns of the same face. The MVP takes its history from the simulator, so it can solve any scramble or sequence you create there.

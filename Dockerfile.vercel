@@ -1,0 +1,20 @@
+FROM node:24-alpine AS frontend
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY index.html vite.config.js ./
+COPY src ./src
+RUN npm run build
+
+FROM dunglas/frankenphp:1-php8.4-alpine
+WORKDIR /app
+
+RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+COPY Caddyfile /etc/caddy/Caddyfile
+COPY server ./server
+COPY --from=frontend /app/dist/ ./server/public/
+
+EXPOSE 80
+CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]
